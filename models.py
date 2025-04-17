@@ -10,6 +10,12 @@ class HairlineCreate(SQLModel):
 
     model_config = {"from_attributes": True}
 
+    @field_validator("type")
+    def type_must_not_be_empty(cls, v):
+        if not v:
+            raise ValueError("Type must not be empty")
+        return v
+
 
 class Hairline(HairlineCreate, table=True):
     id: int = Field(primary_key=True)
@@ -29,18 +35,18 @@ class PersonCreate(SQLModel):
     model_config = {"from_attributes": True}
 
     @model_validator(mode="after")
-    def validate(cls, values):
-        if values.get("age") <= 0:
+    def validate(self):
+        if self.age <= 0:
             raise ValueError("Age must be greater than 0")
-        if values.get("height") <= 0:
+        if self.height <= 0:
             raise ValueError("Height must be greater than 0")
-        if values.get("stride_length") <= 0:
+        if self.stride_length <= 0:
             raise ValueError("Stride length must be greater than 0")
-        if not values.get("features"):
+        if not self.features:
             raise ValueError("Features must not be empty")
-        if values.get("hairline_id") is not None and values["hairline_id"] <= 0:
+        if self.hairline_id is not None and self.hairline_id <= 0:
             raise ValueError("Hairline ID must be greater than 0")
-        return values
+        return self
 
 
 class Person(PersonCreate, table=True):
@@ -80,14 +86,16 @@ class EventCreate(SQLModel):
     model_config = {"from_attributes": True}
 
     @model_validator(mode="after")
-    def validate(cls, values):
-        if values.get("person_id") <= 0:
+    def validate(self):
+        if self.person_id <= 0:
             raise ValueError("Person ID must be greater than 0")
-        if values.get("area_id") is not None and values["area_id"] <= 0:
+        if self.area_id is not None and self.area_id <= 0:
             raise ValueError("Area ID must be greater than 0")
-        if values.get("action_id") is not None and values["action_id"] <= 0:
+        if self.action_id is not None and self.action_id <= 0:
             raise ValueError("Action ID must be greater than 0")
-        return values
+        if not self.time <= datetime.now():
+            raise ValueError("Time must be in the past")
+        return self
 
 
 class Event(SQLModel, table=True):
@@ -112,16 +120,18 @@ class ApparelCreate(SQLModel):
     model_config = {"from_attributes": True}
 
     @model_validator(mode="after")
-    def validate(cls, values):
-        if values.get("person_id") <= 0:
+    def validate(self):
+        if self.person_id <= 0:
             raise ValueError("Person ID must be greater than 0")
-        if not values.get("shirt_colour"):
+        if not self.shirt_colour:
             raise ValueError("Shirt colour must not be empty")
-        if not values.get("pant_colour"):
+        if not self.pant_colour:
             raise ValueError("Pant colour must not be empty")
-        if not values.get("shoe_colour"):
+        if not self.shoe_colour:
             raise ValueError("Shoe colour must not be empty")
-        return values
+        if not self.time <= datetime.now():
+            raise ValueError("Time must be in the past")
+        return self
 
 
 class Apparel(ApparelCreate, table=True):
@@ -160,14 +170,14 @@ class TrackCreate(SQLModel):
     model_config = {"from_attributes": True}
 
     @model_validator(mode="after")
-    def validate(cls, values):
-        if values.get("person_id") <= 0:
+    def validate(self):
+        if self.person_id <= 0:
             raise ValueError("Person ID must be greater than 0")
-        if not values.get("time") > datetime.now():
+        if not self.time <= datetime.now():
             raise ValueError("Time must be in the past")
-        if values.get("duration") <= timedelta(0):
+        if self.duration <= timedelta(0):
             raise ValueError("Duration must be greater than 0")
-        return values
+        return self
 
 
 class Track(TrackCreate, table=True):
