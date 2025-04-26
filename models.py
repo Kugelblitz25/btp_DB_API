@@ -5,6 +5,60 @@ from pydantic import field_validator, model_validator
 from sqlmodel import Field, Relationship, SQLModel
 
 
+class GenderCreate(SQLModel):
+    value: str
+
+    model_config = {"from_attributes": True}
+
+    @field_validator("value")
+    def value_must_not_be_empty(cls, v):
+        if not v:
+            raise ValueError("Value must not be empty")
+        return v
+
+
+class Gender(GenderCreate, table=True):
+    id: int = Field(primary_key=True)
+
+    people: List["Person"] = Relationship(back_populates="gender")
+
+
+class RaceCreate(SQLModel):
+    value: str
+
+    model_config = {"from_attributes": True}
+
+    @field_validator("value")
+    def value_must_not_be_empty(cls, v):
+        if not v:
+            raise ValueError("Value must not be empty")
+        return v
+
+
+class Race(RaceCreate, table=True):
+    id: int = Field(primary_key=True)
+
+    people: List["Person"] = Relationship(back_populates="race")
+
+
+class AgeCreate(SQLModel):
+    value: str
+
+    model_config = {"from_attributes": True}
+
+    @field_validator("value")
+    def value_must_not_be_empty(cls, v):
+        if not v:
+            raise ValueError("Value must not be empty")
+        return v
+
+
+class Age(AgeCreate, table=True):
+    id: int = Field(primary_key=True)
+
+    people: List["Person"] = Relationship(back_populates="age")
+
+
 class HairlineCreate(SQLModel):
     type: str
 
@@ -24,36 +78,48 @@ class Hairline(HairlineCreate, table=True):
 
 
 class PersonCreate(SQLModel):
-    features: str
+    base64: str
     height: float
     stride_length: float
-    gender: bool
-    age: int
+    gender_id: int
     glasses: bool
+    feature: str  # Assuming this is the equivalent of 'feature' USER-DEFINED in SQL
     hairline_id: Optional[int] = None
+    race_id: Optional[int] = None
+    age_id: Optional[int] = None
 
     model_config = {"from_attributes": True}
 
     @model_validator(mode="after")
     def validate(self):
-        if self.age <= 0:
-            raise ValueError("Age must be greater than 0")
         if self.height <= 0:
             raise ValueError("Height must be greater than 0")
         if self.stride_length <= 0:
             raise ValueError("Stride length must be greater than 0")
-        if not self.features:
-            raise ValueError("Features must not be empty")
+        if not self.base64:
+            raise ValueError("Base64 must not be empty")
+        if self.gender_id <= 0:
+            raise ValueError("Gender ID must be greater than 0")
         if self.hairline_id is not None and self.hairline_id <= 0:
             raise ValueError("Hairline ID must be greater than 0")
+        if self.race_id is not None and self.race_id <= 0:
+            raise ValueError("Race ID must be greater than 0")
+        if self.age_id is not None and self.age_id <= 0:
+            raise ValueError("Age ID must be greater than 0")
         return self
 
 
 class Person(PersonCreate, table=True):
     id: int = Field(primary_key=True)
+    gender_id: int = Field(foreign_key="gender.id")
     hairline_id: Optional[int] = Field(default=None, foreign_key="hairline.id")
+    race_id: Optional[int] = Field(default=None, foreign_key="race.id")
+    age_id: Optional[int] = Field(default=None, foreign_key="age.id")
 
+    gender: "Gender" = Relationship(back_populates="people")
     hairline: Optional[Hairline] = Relationship(back_populates="people")
+    race: Optional["Race"] = Relationship(back_populates="people")
+    age: Optional["Age"] = Relationship(back_populates="people")
     tracks: List["Track"] = Relationship(back_populates="person")
     events: List["Event"] = Relationship(back_populates="person")
     apparels: List["Apparel"] = Relationship(back_populates="person")
