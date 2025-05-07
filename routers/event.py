@@ -288,7 +288,7 @@ async def create_track(
 @router.get("/tracks/", response_model=List[Track])
 async def read_tracks(
     skip: int = 0,
-    limit: int = 100,
+    limit: int = 1,
     person_id: Optional[int] = None,
     session: AsyncSession = Depends(get_session),
 ):
@@ -297,7 +297,7 @@ async def read_tracks(
     if person_id:
         query = query.where(Track.person_id == person_id)
 
-    tracks = await session.execute(query.offset(skip).limit(limit))
+    tracks = await session.execute(query.offset(skip).limit(limit).order_by(Track.time.desc()))
     return tracks.scalars().all()
 
 
