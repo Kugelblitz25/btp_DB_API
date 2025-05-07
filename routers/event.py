@@ -27,7 +27,7 @@ async def get_session():
 
 # Area CRUD operations
 @router.post("/areas/", response_model=Area)
-async def create_area(area: ActionCreate, session: AsyncSession = Depends(get_session)):
+async def create_area(area: AreaCreate, session: AsyncSession = Depends(get_session)):
     area = Area(**area.model_dump())
     session.add(area)
     await session.commit()

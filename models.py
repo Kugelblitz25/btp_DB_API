@@ -78,12 +78,11 @@ class Hairline(HairlineCreate, table=True):
 
 
 class PersonCreate(SQLModel):
-    base64: str
+    base64: Optional[str] = None
     height: float
-    stride_length: float
-    gender_id: int
     glasses: bool
-    feature: str  # Assuming this is the equivalent of 'feature' USER-DEFINED in SQL
+    feature: str
+    gender_id: Optional[int] = None
     hairline_id: Optional[int] = None
     race_id: Optional[int] = None
     age_id: Optional[int] = None
@@ -94,11 +93,7 @@ class PersonCreate(SQLModel):
     def validate(self):
         if self.height <= 0:
             raise ValueError("Height must be greater than 0")
-        if self.stride_length <= 0:
-            raise ValueError("Stride length must be greater than 0")
-        if not self.base64:
-            raise ValueError("Base64 must not be empty")
-        if self.gender_id <= 0:
+        if self.gender_id is not None and self.gender_id <= 0:
             raise ValueError("Gender ID must be greater than 0")
         if self.hairline_id is not None and self.hairline_id <= 0:
             raise ValueError("Hairline ID must be greater than 0")
@@ -180,7 +175,6 @@ class ApparelCreate(SQLModel):
     person_id: int
     shirt_colour: str
     pant_colour: str
-    shoe_colour: str
     time: datetime
 
     model_config = {"from_attributes": True}
@@ -193,8 +187,6 @@ class ApparelCreate(SQLModel):
             raise ValueError("Shirt colour must not be empty")
         if not self.pant_colour:
             raise ValueError("Pant colour must not be empty")
-        if not self.shoe_colour:
-            raise ValueError("Shoe colour must not be empty")
         if not self.time <= datetime.now():
             raise ValueError("Time must be in the past")
         return self
@@ -231,7 +223,6 @@ class TrackCreate(SQLModel):
     duration: timedelta
     x: float
     y: float
-    velocity: float
 
     model_config = {"from_attributes": True}
 
