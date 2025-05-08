@@ -82,7 +82,7 @@ class PersonCreate(SQLModel):
     height: float = 0.1
     glasses: Optional[bool] = None
     feature: Optional[str] = None
-    gender_id: Optional[int] = None
+    gender_id: Optional[int] = 3
     hairline_id: Optional[int] = None
     race_id: Optional[int] = None
     age_id: Optional[int] = None
