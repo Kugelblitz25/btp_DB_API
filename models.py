@@ -106,7 +106,7 @@ class PersonCreate(SQLModel):
 
 class Person(PersonCreate, table=True):
     id: int = Field(primary_key=True)
-    gender_id: int = Field(foreign_key="gender.id")
+    gender_id: Optional[int] = Field(foreign_key="gender.id")
     hairline_id: Optional[int] = Field(default=None, foreign_key="hairline.id")
     race_id: Optional[int] = Field(default=None, foreign_key="race.id")
     age_id: Optional[int] = Field(default=None, foreign_key="age.id")
