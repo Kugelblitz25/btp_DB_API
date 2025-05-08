@@ -79,9 +79,9 @@ class Hairline(HairlineCreate, table=True):
 
 class PersonCreate(SQLModel):
     base64: Optional[str] = None
-    height: float
-    glasses: bool
-    feature: str
+    height: float = 0.1
+    glasses: Optional[bool] = None
+    feature: Optional[str] = None
     gender_id: Optional[int] = None
     hairline_id: Optional[int] = None
     race_id: Optional[int] = None
@@ -106,7 +106,7 @@ class PersonCreate(SQLModel):
 
 class Person(PersonCreate, table=True):
     id: int = Field(primary_key=True)
-    gender_id: int = Field(foreign_key="gender.id")
+    gender_id: Optional[int] = Field(foreign_key="gender.id")
     hairline_id: Optional[int] = Field(default=None, foreign_key="hairline.id")
     race_id: Optional[int] = Field(default=None, foreign_key="race.id")
     age_id: Optional[int] = Field(default=None, foreign_key="age.id")
