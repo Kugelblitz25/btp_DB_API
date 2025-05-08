@@ -301,12 +301,13 @@ async def create_person(
     person: PersonCreate, session: AsyncSession = Depends(get_session)
 ):
     # Validate gender_id
-    gender = await session.get(Gender, person.gender_id)
-    if not gender:
-        raise HTTPException(
-            status_code=404,
-            detail=f"Gender with id {person.gender_id} not found",
-        )
+    if person.gender_id is not None:
+        gender = await session.get(Gender, person.gender_id)
+        if not gender:
+            raise HTTPException(
+                status_code=404,
+                detail=f"Gender with id {person.gender_id} not found",
+            )
     
     # Validate hairline_id if provided
     if person.hairline_id is not None:
