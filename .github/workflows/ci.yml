@@ -1,0 +1,40 @@
+name: Run Tests
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Set up Python
+      uses: actions/setup-python@v5
+      with:
+        python-version: '3.10' # Matches .python-version
+
+    - name: Install uv
+      run: curl -LsSf https://astral.sh/uv/install.sh | sh
+
+    - name: Install dependencies
+      run: |
+        source $HOME/.cargo/env 
+        # Install main and dev dependencies from pyproject.toml using uv
+        # The --extra dev syntax attempts to install Poetry's dev group
+        # If this specific syntax isn't supported, an alternative for uv
+        # or falling back to poetry install would be needed.
+        # For now, assuming uv handles this or a similar mechanism for dev groups.
+        # A common way for uv to install dev dependencies defined in pyproject.toml (Poetry)
+        # is by specifying the group. Poetry groups are like extras.
+        uv pip install ".[dev]"
+
+    - name: Run tests
+      run: |
+        source $HOME/.cargo/env # To ensure shims are active if needed
+        pytest -v
+```
